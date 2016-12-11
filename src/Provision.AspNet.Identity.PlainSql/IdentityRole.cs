@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.AspNet.Identity;
 
-namespace AspNet.Identity.PlainSql
+namespace Provision.AspNet.Identity.PlainSql
 {
 	public class IdentityRole : IRole, IRole<String>
 	{

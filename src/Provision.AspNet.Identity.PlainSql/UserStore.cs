@@ -6,19 +6,18 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 
-namespace AspNet.Identity.PlainSql
+namespace Provision.AspNet.Identity.PlainSql
 {
 	/// <summary>
 	/// Class that implements the key ASP.NET Identity user store interfaces
 	/// </summary>
-	public class UserStore : IUserLoginStore<IdentityUser>,
-					IUserClaimStore<IdentityUser>,
-					IUserRoleStore<IdentityUser>,
-					IUserPasswordStore<IdentityUser>,
-					IUserSecurityStampStore<IdentityUser>,
-					IQueryableUserStore<IdentityUser>,
-					IUserEmailStore<IdentityUser>,
-					IUserStore<IdentityUser>
+	public class UserStore : IUserLoginStore<IdentityUser, Guid>,
+					IUserClaimStore<IdentityUser, Guid>,
+					IUserRoleStore<IdentityUser, Guid>,
+					IUserPasswordStore<IdentityUser, Guid>,
+					IUserSecurityStampStore<IdentityUser, Guid>,
+					IQueryableUserStore<IdentityUser, Guid>,
+					IUserEmailStore<IdentityUser, Guid>
 	{
 		private readonly UserTable<IdentityUser> _userTable;
 		private readonly RoleTable _roleTable;
@@ -26,24 +25,24 @@ namespace AspNet.Identity.PlainSql
 		private readonly UserClaimsTable _userClaimsTable;
 		private readonly UserLoginsTable _userLoginsTable;
 
-		public IQueryable<IdentityUser> Users {
-			get {
-				return _userTable.GetAllUsers().AsQueryable();
-			}
-		}
-
 		/// <summary>
-		/// Constructor that takes an open database connection as argument.
+		/// Constructor that takes a PostgreSQLDatabase as argument.
 		/// </summary>
 		/// <param name="connection"></param>
 		public UserStore(IDbConnection connection)
 		{
-			var database = new PostgresWrapper(connection);
+			var database = new SqlDatabase(connection);
 			_userTable = new UserTable<IdentityUser>(database);
 			_roleTable = new RoleTable(database);
 			_userRolesTable = new UserRolesTable(database);
 			_userClaimsTable = new UserClaimsTable(database);
 			_userLoginsTable = new UserLoginsTable(database);
+		}
+
+		public IQueryable<IdentityUser> Users {
+			get {
+				return _userTable.GetAllUsers().AsQueryable();
+			}
 		}
 
 		/// <summary>
@@ -67,13 +66,9 @@ namespace AspNet.Identity.PlainSql
 		/// </summary>
 		/// <param name="userId">The user's Id.</param>
 		/// <returns></returns>
-		public Task<IdentityUser> FindByIdAsync(String userId)
+		public Task<IdentityUser> FindByIdAsync(Guid userId)
 		{
-			if (String.IsNullOrEmpty(userId)) {
-				throw new ArgumentException("Null or empty argument: userId");
-			}
-
-			IdentityUser result = _userTable.GetUserById(userId) as IdentityUser;
+			var result = _userTable.GetUserById(userId) as IdentityUser;
 			if (result != null) {
 				return Task.FromResult<IdentityUser>(result);
 			}
@@ -152,7 +147,7 @@ namespace AspNet.Identity.PlainSql
 		/// <returns></returns>
 		public Task<IList<Claim>> GetClaimsAsync(IdentityUser user)
 		{
-			ClaimsIdentity identity = _userClaimsTable.FindByUserId(user.Id);
+			var identity = _userClaimsTable.FindByUserId(user.Id);
 
 			return Task.FromResult<IList<Claim>>(identity.Claims.ToList());
 		}
@@ -211,11 +206,9 @@ namespace AspNet.Identity.PlainSql
 			}
 
 			var userId = _userLoginsTable.FindUserIdByLogin(login);
-			if (userId != null) {
-				IdentityUser user = _userTable.GetUserById(userId) as IdentityUser;
-				if (user != null) {
-					return Task.FromResult<IdentityUser>(user);
-				}
+			IdentityUser user = _userTable.GetUserById(userId) as IdentityUser;
+			if (user != null) {
+				return Task.FromResult<IdentityUser>(user);
 			}
 
 			return Task.FromResult<IdentityUser>(null);
@@ -499,17 +492,18 @@ namespace AspNet.Identity.PlainSql
 			return Task.FromResult<IdentityUser>(null);
 		}
 
-		private bool _disposed = false; // To detect redundant calls
+		private bool _disposed ;
 
 		protected virtual void Dispose(bool disposing)
 		{
 			if (!_disposed) {
 				if (disposing) {
-					// Dispose managed state (managed objects).
+					// Dispose managed resources
 				}
 
-				// Free unmanaged resources (unmanaged objects) and override a finalizer below.
+				// Free unmanaged resources
 				// Set large fields to null.
+
 				_disposed = true;
 			}
 		}

@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AspNet.Identity.PlainSql
+namespace Provision.AspNet.Identity.PlainSql
 {
 	/// <summary>
 	/// Class that represents the AspNetRoles table in the SQL Database.
 	/// </summary>
 	internal class RoleTable
 	{
-		private readonly PostgresWrapper _database;
+		private readonly SqlDatabase _database;
 
 		/// <summary>
-		/// Constructor that takes a open database connection instance.
+		/// Constructor that takes a PostgreSQLDatabase instance.
 		/// </summary>
 		/// <param name="database"></param>
-		public RoleTable(PostgresWrapper database)
+		public RoleTable(SqlDatabase database)
 		{
 			_database = database;
 		}
@@ -78,7 +78,7 @@ namespace AspNet.Identity.PlainSql
 			Dictionary<String, Object> parameters = new Dictionary<String, Object>();
 			parameters.Add("@id", roleId);
 
-			return _database.GetStrValue(commandText, parameters);
+			return _database.GetString(commandText, parameters);
 		}
 
 		/// <summary>

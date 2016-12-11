@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using Microsoft.AspNet.Identity;
 
-namespace AspNet.Identity.PlainSql
+namespace Provision.AspNet.Identity.PlainSql
 {
 	/// <summary>
 	/// Class that implements the ASP.NET Identity IUser interface.
 	/// </summary>
-	public class IdentityUser : IUser
+	public class IdentityUser : IUser<Guid>
 	{
 		/// <summary>
 		/// Default constructor.
 		/// </summary>
 		public IdentityUser()
 		{
-			Id = Guid.NewGuid().ToString();
+			Id = Guid.NewGuid();
 		}
 
 		/// <summary>
@@ -30,7 +30,7 @@ namespace AspNet.Identity.PlainSql
 		/// <summary>
 		/// User ID.
 		/// </summary>
-		public String Id { get; set; }
+		public Guid Id { get; set; }
 
 		/// <summary>
 		/// User's name.

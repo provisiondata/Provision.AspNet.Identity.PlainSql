@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AspNet.Identity.PlainSql
+namespace Provision.AspNet.Identity.PlainSql
 {
 	/// <summary>
 	/// Class that represents the AspNetUserRoles table in the SQL Database.
 	/// </summary>
 	internal class UserRolesTable
 	{
-		private readonly PostgresWrapper _database;
+		private readonly SqlDatabase _database;
 
 		/// <summary>
-		/// Constructor that takes a open database connection instance.
+		/// Constructor that takes a PostgreSQLDatabase instance.
 		/// </summary>
 		/// <param name="database"></param>
-		public UserRolesTable(PostgresWrapper database)
+		public UserRolesTable(SqlDatabase database)
 		{
 			_database = database;
 		}
@@ -24,7 +24,7 @@ namespace AspNet.Identity.PlainSql
 		/// </summary>
 		/// <param name="userId">The user's id.</param>
 		/// <returns></returns>
-		public List<String> FindByUserId(String userId)
+		public List<String> FindByUserId(Guid userId)
 		{
 			List<String> roles = new List<String>();
 
@@ -45,7 +45,7 @@ namespace AspNet.Identity.PlainSql
 		/// </summary>
 		/// <param name="userId">The user's id.</param>
 		/// <returns></returns>
-		public int Delete(String userId, String role)
+		public int Delete(Guid userId, String role)
 		{
 			String commandText = "DELETE FROM \"AspNetUserRoles\" WHERE \"UserId\" = @userId AND \"RoleId\" = @Role;";
 			Dictionary<String, Object> parameters = new Dictionary<String, Object>();
@@ -62,7 +62,7 @@ namespace AspNet.Identity.PlainSql
 		/// </summary>
 		/// <param name="userId">The user's id.</param>
 		/// <returns></returns>
-		public int Delete(String userId)
+		public int Delete(Guid userId)
 		{
 			String commandText = "DELETE FROM \"AspNetUserRoles\" WHERE \"UserId\" = @userId";
 			Dictionary<String, Object> parameters = new Dictionary<String, Object>();

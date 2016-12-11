@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 
-namespace AspNet.Identity.PlainSql
+namespace Provision.AspNet.Identity.PlainSql
 {
 	/// <summary>
 	/// Class that represents the AspNetUsers table in the SQL database.
@@ -10,13 +9,13 @@ namespace AspNet.Identity.PlainSql
 	internal class UserTable<TUser>
 			where TUser : IdentityUser, new()
 	{
-		private readonly PostgresWrapper _database;
+		private readonly SqlDatabase _database;
 
 		/// <summary>
 		/// Constructor that takes a SQL database instance.
 		/// </summary>
 		/// <param name="database"></param>
-		public UserTable(PostgresWrapper database)
+		public UserTable(SqlDatabase database)
 		{
 			_database = database;
 		}
@@ -26,11 +25,11 @@ namespace AspNet.Identity.PlainSql
 		/// </summary>
 		/// <param name="userId"></param>
 		/// <returns></returns>
-		public String GetUserName(String userId)
+		public String GetUserName(Guid userId)
 		{
-			var commandText = "SELECT \"UserName\" FROM \"AspNetUsers\" WHERE \"Id\" = @id";
+			const string commandText = "SELECT \"UserName\" FROM \"AspNetUsers\" WHERE \"Id\" = @id";
 			var parameters = new Dictionary<String, Object>() { { "@id", userId } };
-			return _database.GetStrValue(commandText, parameters);
+			return _database.GetString(commandText, parameters);
 		}
 
 		/// <summary>
@@ -44,12 +43,12 @@ namespace AspNet.Identity.PlainSql
 				throw new ArgumentNullException(nameof(userName));
 
 			//Due to SQL's case sensitivity, we have another column for the user name in lowercase.
-			userName = userName.ToLower(CultureInfo.InvariantCulture);
+			userName = userName.ToLower(System.Globalization.CultureInfo.InvariantCulture);
 
-			var commandText = "SELECT \"Id\" FROM \"AspNetUsers\" WHERE LOWER(\"UserName\") = @name";
+			const string commandText = "SELECT \"Id\" FROM \"AspNetUsers\" WHERE LOWER(\"UserName\") = @name";
 			var parameters = new Dictionary<String, Object>() { { "@name", userName } };
 
-			return _database.GetStrValue(commandText, parameters);
+			return _database.GetString(commandText, parameters);
 		}
 
 		/// <summary>
@@ -59,39 +58,41 @@ namespace AspNet.Identity.PlainSql
 		public IEnumerable<TUser> GetAllUsers()
 		{
 			var users = new List<TUser>();
-			var commandText = "SELECT * FROM \"AspNetUsers\"";
+			const string commandText = "SELECT * FROM \"AspNetUsers\"";
 			var rows = _database.Query(commandText, new Dictionary<String, Object>());
 
 			foreach (var row in rows) {
-				TUser user = new TUser();
-				user.Id = row["Id"];
-				user.UserName = row["UserName"];
-				user.PasswordHash = String.IsNullOrEmpty(row["PasswordHash"]) ? null : row["PasswordHash"];
-				user.SecurityStamp = String.IsNullOrEmpty(row["SecurityStamp"]) ? null : row["SecurityStamp"];
-				user.Email = String.IsNullOrEmpty(row["Email"]) ? null : row["Email"];
-				user.EmailConfirmed = row["EmailConfirmed"] == "True";
+				var user = new TUser {
+					Id = Guid.Parse(row["Id"]),
+					UserName = row["UserName"],
+					PasswordHash = String.IsNullOrEmpty(row["PasswordHash"]) ? null : row["PasswordHash"],
+					SecurityStamp = String.IsNullOrEmpty(row["SecurityStamp"]) ? null : row["SecurityStamp"],
+					Email = String.IsNullOrEmpty(row["Email"]) ? null : row["Email"],
+					EmailConfirmed = row["EmailConfirmed"] == "True"
+				};
 				users.Add(user);
 			}
 
 			return users;
 		}
 
-		public TUser GetUserById(String userId)
+		public TUser GetUserById(Guid userId)
 		{
 			TUser user = null;
-			var commandText = "SELECT * FROM \"AspNetUsers\" WHERE \"Id\" = @id";
+			const string commandText = "SELECT * FROM \"AspNetUsers\" WHERE \"Id\" = @id";
 			var parameters = new Dictionary<String, Object>() { { "@id", userId } };
 
 			var rows = _database.Query(commandText, parameters);
 			if (rows != null && rows.Count == 1) {
 				var row = rows[0];
-				user = new TUser();
-				user.Id = row["Id"];
-				user.UserName = row["UserName"];
-				user.PasswordHash = String.IsNullOrEmpty(row["PasswordHash"]) ? null : row["PasswordHash"];
-				user.SecurityStamp = String.IsNullOrEmpty(row["SecurityStamp"]) ? null : row["SecurityStamp"];
-				user.Email = String.IsNullOrEmpty(row["Email"]) ? null : row["Email"];
-				user.EmailConfirmed = row["EmailConfirmed"] == "True";
+				user = new TUser {
+					Id = Guid.Parse(row["Id"]),
+					UserName = row["UserName"],
+					PasswordHash = String.IsNullOrEmpty(row["PasswordHash"]) ? null : row["PasswordHash"],
+					SecurityStamp = String.IsNullOrEmpty(row["SecurityStamp"]) ? null : row["SecurityStamp"],
+					Email = String.IsNullOrEmpty(row["Email"]) ? null : row["Email"],
+					EmailConfirmed = row["EmailConfirmed"] == "True"
+				};
 			}
 
 			return user;
@@ -108,20 +109,21 @@ namespace AspNet.Identity.PlainSql
 				throw new ArgumentNullException(nameof(userName));
 
 			//Due to SQL's case sensitivity, we have another column for the user name in lowercase.
-			userName = userName.ToLower(CultureInfo.InvariantCulture);
+			userName = userName.ToLower(System.Globalization.CultureInfo.InvariantCulture);
 
 			var users = new List<TUser>();
-			var commandText = "SELECT * FROM \"AspNetUsers\" WHERE LOWER(\"UserName\") = @name";
+			const string commandText = "SELECT * FROM \"AspNetUsers\" WHERE LOWER(\"UserName\") = @name";
 			var parameters = new Dictionary<String, Object>() { { "@name", userName } };
 			var rows = _database.Query(commandText, parameters);
 			foreach (var row in rows) {
-				TUser user = new TUser();
-				user.Id = row["Id"];
-				user.UserName = row["UserName"];
-				user.PasswordHash = String.IsNullOrEmpty(row["PasswordHash"]) ? null : row["PasswordHash"];
-				user.SecurityStamp = String.IsNullOrEmpty(row["SecurityStamp"]) ? null : row["SecurityStamp"];
-				user.Email = String.IsNullOrEmpty(row["Email"]) ? null : row["Email"];
-				user.EmailConfirmed = row["EmailConfirmed"] == "True";
+				var user = new TUser {
+					Id = Guid.Parse(row["Id"]),
+					UserName = row["UserName"],
+					PasswordHash = String.IsNullOrEmpty(row["PasswordHash"]) ? null : row["PasswordHash"],
+					SecurityStamp = String.IsNullOrEmpty(row["SecurityStamp"]) ? null : row["SecurityStamp"],
+					Email = String.IsNullOrEmpty(row["Email"]) ? null : row["Email"],
+					EmailConfirmed = row["EmailConfirmed"] == "True"
+				};
 				users.Add(user);
 			}
 
@@ -139,21 +141,22 @@ namespace AspNet.Identity.PlainSql
 				throw new ArgumentNullException(nameof(email));
 
 			//Due to SQL's case sensitivity, we have another column for the user name in lowercase.
-			email = email.ToLower(CultureInfo.InvariantCulture);
+			email = email.ToLower(System.Globalization.CultureInfo.InvariantCulture);
 
 			var users = new List<TUser>();
-			var commandText = "SELECT * FROM \"AspNetUsers\" WHERE LOWER(\"Email\") = @email";
+			const string commandText = "SELECT * FROM \"AspNetUsers\" WHERE LOWER(\"Email\") = @email";
 			var parameters = new Dictionary<String, Object>() { { "@email", email } };
 
 			var rows = _database.Query(commandText, parameters);
 			foreach (var row in rows) {
-				TUser user = new TUser();
-				user.Id = row["Id"];
-				user.UserName = row["UserName"];
-				user.PasswordHash = String.IsNullOrEmpty(row["PasswordHash"]) ? null : row["PasswordHash"];
-				user.SecurityStamp = String.IsNullOrEmpty(row["SecurityStamp"]) ? null : row["SecurityStamp"];
-				user.Email = String.IsNullOrEmpty(row["Email"]) ? null : row["Email"];
-				user.EmailConfirmed = row["EmailConfirmed"] == "True";
+				var user = new TUser {
+					Id = Guid.Parse(row["Id"]),
+					UserName = row["UserName"],
+					PasswordHash = String.IsNullOrEmpty(row["PasswordHash"]) ? null : row["PasswordHash"],
+					SecurityStamp = String.IsNullOrEmpty(row["SecurityStamp"]) ? null : row["SecurityStamp"],
+					Email = String.IsNullOrEmpty(row["Email"]) ? null : row["Email"],
+					EmailConfirmed = row["EmailConfirmed"] == "True"
+				};
 				users.Add(user);
 			}
 
@@ -165,15 +168,12 @@ namespace AspNet.Identity.PlainSql
 		/// </summary>
 		/// <param name="userId">The user's id.</param>
 		/// <returns></returns>
-		public String GetPasswordHash(String userId)
+		public String GetPasswordHash(Guid userId)
 		{
-			if (String.IsNullOrWhiteSpace(userId))
-				throw new ArgumentNullException(nameof(userId));
-
-			var commandText = "SELECT \"PasswordHash\" FROM \"AspNetUsers\" WHERE \"Id\" = @id";
+			const string commandText = "SELECT \"PasswordHash\" FROM \"AspNetUsers\" WHERE \"Id\" = @id";
 			var parameters = new Dictionary<String, Object>();
 			parameters.Add("@id", userId);
-			var passHash = _database.GetStrValue(commandText, parameters);
+			var passHash = _database.GetString(commandText, parameters);
 			if (String.IsNullOrEmpty(passHash)) {
 				return null;
 			}
@@ -187,15 +187,12 @@ namespace AspNet.Identity.PlainSql
 		/// <param name="userId"></param>
 		/// <param name="passwordHash"></param>
 		/// <returns></returns>
-		public Int32 SetPasswordHash(String userId, String passwordHash)
+		public Int32 SetPasswordHash(Guid userId, String passwordHash)
 		{
-			if (String.IsNullOrWhiteSpace(userId))
-				throw new ArgumentNullException(nameof(userId));
-
 			if (String.IsNullOrWhiteSpace(passwordHash))
 				throw new ArgumentNullException(nameof(passwordHash));
 
-			var commandText = "UPDATE \"AspNetUsers\" SET \"PasswordHash\" = @pwdHash WHERE \"Id\" = @id";
+			const string commandText = "UPDATE \"AspNetUsers\" SET \"PasswordHash\" = @pwdHash WHERE \"Id\" = @id";
 			var parameters = new Dictionary<String, Object>();
 			parameters.Add("@pwdHash", passwordHash);
 			parameters.Add("@id", userId);
@@ -208,14 +205,11 @@ namespace AspNet.Identity.PlainSql
 		/// </summary>
 		/// <param name="userId"></param>
 		/// <returns></returns>
-		public String GetSecurityStamp(String userId)
+		public String GetSecurityStamp(Guid userId)
 		{
-			if (String.IsNullOrWhiteSpace(userId))
-				throw new ArgumentNullException(nameof(userId));
-
-			var commandText = "SELECT \"SecurityStamp\" FROM \"AspNetUsers\" WHERE \"Id\" = @id";
+			const string commandText = "SELECT \"SecurityStamp\" FROM \"AspNetUsers\" WHERE \"Id\" = @id";
 			var parameters = new Dictionary<String, Object>() { { "@id", userId } };
-			var result = _database.GetStrValue(commandText, parameters);
+			var result = _database.GetString(commandText, parameters);
 
 			return result;
 		}
@@ -230,7 +224,7 @@ namespace AspNet.Identity.PlainSql
 			if (user == null)
 				throw new ArgumentNullException(nameof(user));
 
-			String commandText = @"
+			const string commandText = @"
 				INSERT INTO ""AspNetUsers""(""Id"", ""UserName"", ""PasswordHash"", ""SecurityStamp"", ""Email"", ""EmailConfirmed"")
 				VALUES (@id, @name, @pwdHash, @SecStamp, @email, @emailconfirmed);";
 
@@ -241,23 +235,6 @@ namespace AspNet.Identity.PlainSql
 			parameters.Add("@SecStamp", user.SecurityStamp);
 			parameters.Add("@email", user.Email);
 			parameters.Add("@emailconfirmed", user.EmailConfirmed);
-
-			return _database.Execute(commandText, parameters);
-		}
-
-		/// <summary>
-		/// Deletes a user from the AspNetUsers table.
-		/// </summary>
-		/// <param name="userId">The user's id.</param>
-		/// <returns></returns>
-		private Int32 Delete(String userId)
-		{
-			if (String.IsNullOrWhiteSpace(userId))
-				throw new ArgumentNullException(nameof(userId));
-
-			var commandText = "DELETE FROM \"AspNetUsers\" WHERE \"Id\" = @userId";
-			var parameters = new Dictionary<String, Object>();
-			parameters.Add("@userId", userId);
 
 			return _database.Execute(commandText, parameters);
 		}
@@ -285,7 +262,7 @@ namespace AspNet.Identity.PlainSql
 			if (user == null)
 				throw new ArgumentNullException(nameof(user));
 
-			var commandText = "UPDATE \"AspNetUsers\" SET \"UserName\" = @userName, \"PasswordHash\" = @pswHash, \"SecurityStamp\" = @secStamp, \"Email\"= @email, \"EmailConfirmed\" = @emailconfirmed WHERE \"Id\" = @userId;";
+			const string commandText = "UPDATE \"AspNetUsers\" SET \"UserName\" = @userName, \"PasswordHash\" = @pswHash, \"SecurityStamp\" = @secStamp, \"Email\"= @email, \"EmailConfirmed\" = @emailconfirmed WHERE \"Id\" = @userId;";
 			var parameters = new Dictionary<String, Object>();
 			parameters.Add("@userName", user.UserName);
 			parameters.Add("@pswHash", user.PasswordHash);
@@ -293,6 +270,20 @@ namespace AspNet.Identity.PlainSql
 			parameters.Add("@userId", user.Id);
 			parameters.Add("@email", user.Email);
 			parameters.Add("@emailconfirmed", user.EmailConfirmed);
+
+			return _database.Execute(commandText, parameters);
+		}
+
+		/// <summary>
+		/// Deletes a user from the AspNetUsers table.
+		/// </summary>
+		/// <param name="userId">The user's id.</param>
+		/// <returns></returns>
+		private Int32 Delete(Guid userId)
+		{
+			const string commandText = "DELETE FROM \"AspNetUsers\" WHERE \"Id\" = @userId";
+			var parameters = new Dictionary<String, Object>();
+			parameters.Add("@userId", userId);
 
 			return _database.Execute(commandText, parameters);
 		}

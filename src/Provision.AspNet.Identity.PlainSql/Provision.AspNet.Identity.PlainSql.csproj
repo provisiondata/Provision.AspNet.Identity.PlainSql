@@ -7,8 +7,8 @@
     <ProjectGuid>{9248DEFF-4947-481F-BA7C-09E9925E62D2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Provision.AspNet.Identity</RootNamespace>
-    <AssemblyName>Provision.AspNet.Identity.PostgreSQL</AssemblyName>
+    <RootNamespace>Provision.AspNet.Identity.PlainSql</RootNamespace>
+    <AssemblyName>Provision.AspNet.Identity.PlainSql</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -51,12 +51,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IdentityRole.cs" />
     <Compile Include="IdentityUser.cs" />
+    <Compile Include="IdentityUserManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RoleStore.cs" />
     <Compile Include="RoleTable.cs" />
-    <Compile Include="PostgresWrapper.cs" />
+    <Compile Include="SqlDatabaseContext.cs" />
     <Compile Include="UserClaimsTable.cs" />
     <Compile Include="UserLoginsTable.cs" />
     <Compile Include="UserRoleTable.cs" />

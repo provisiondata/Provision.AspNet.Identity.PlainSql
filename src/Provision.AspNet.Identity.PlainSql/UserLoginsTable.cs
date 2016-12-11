@@ -2,20 +2,20 @@
 using System.Collections.Generic;
 using Microsoft.AspNet.Identity;
 
-namespace AspNet.Identity.PlainSql
+namespace Provision.AspNet.Identity.PlainSql
 {
 	/// <summary>
 	/// Class that represents the AspNetUserLogins table in the SQL Database.
 	/// </summary>
 	internal class UserLoginsTable
 	{
-		private readonly PostgresWrapper _database;
+		private readonly SqlDatabase _database;
 
 		/// <summary>
-		/// Constructor that takes a open database connection instance.
+		/// Constructor that takes a PostgreSQLDatabase instance.
 		/// </summary>
 		/// <param name="database"></param>
-		public UserLoginsTable(PostgresWrapper database)
+		public UserLoginsTable(SqlDatabase database)
 		{
 			_database = database;
 		}
@@ -42,7 +42,7 @@ namespace AspNet.Identity.PlainSql
 		/// </summary>
 		/// <param name="userId">The user's id.</param>
 		/// <returns></returns>
-		public int Delete(String userId)
+		public int Delete(Guid userId)
 		{
 			String commandText = "DELETE FROM \"AspNetUserLogins\" WHERE \"UserId\" = @userId";
 			Dictionary<String, Object> parameters = new Dictionary<String, Object>();
@@ -73,14 +73,14 @@ namespace AspNet.Identity.PlainSql
 		/// </summary>
 		/// <param name="userLogin">The user's login info.</param>
 		/// <returns></returns>
-		public String FindUserIdByLogin(UserLoginInfo userLogin)
+		public Guid FindUserIdByLogin(UserLoginInfo userLogin)
 		{
-			String commandText = "SELECT \"UserId\" FROM \"AspNetUserLogins\" WHERE \"LoginProvider\" = @loginProvider AND \"ProviderKey\" = @providerKey";
-			Dictionary<String, Object> parameters = new Dictionary<String, Object>();
+			const String commandText = "SELECT \"UserId\" FROM \"AspNetUserLogins\" WHERE \"LoginProvider\" = @loginProvider AND \"ProviderKey\" = @providerKey";
+			var parameters = new Dictionary<String, Object>();
 			parameters.Add("loginProvider", userLogin.LoginProvider);
 			parameters.Add("providerKey", userLogin.ProviderKey);
 
-			return _database.GetStrValue(commandText, parameters);
+			return _database.GetGuid(commandText, parameters);
 		}
 
 		/// <summary>
@@ -88,7 +88,7 @@ namespace AspNet.Identity.PlainSql
 		/// </summary>
 		/// <param name="userId">The user's id.</param>
 		/// <returns></returns>
-		public List<UserLoginInfo> FindByUserId(String userId)
+		public List<UserLoginInfo> FindByUserId(Guid userId)
 		{
 			List<UserLoginInfo> logins = new List<UserLoginInfo>();
 			String commandText = "SELECT * FROM \"AspNetUserLogins\" WHERE \"UserId\" = @userId";

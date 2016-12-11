@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 
-namespace AspNet.Identity.PlainSql
+namespace Provision.AspNet.Identity.PlainSql
 {
 	/// <summary>
 	/// Class that implements the key ASP.NET Identity role store interfaces.
@@ -14,12 +14,12 @@ namespace AspNet.Identity.PlainSql
 		private readonly RoleTable _roleTable;
 
 		/// <summary>
-		/// Constructor that takes a open database connection as argument.
+		/// Constructor that takes a PostgreSQLDatabase as argument.
 		/// </summary>
 		/// <param name="connection"></param>
 		public RoleStore(IDbConnection connection)
 		{
-			var database = new PostgresWrapper(connection);
+			var database = new SqlDatabase(connection);
 			_roleTable = new RoleTable(database);
 		}
 
@@ -78,17 +78,18 @@ namespace AspNet.Identity.PlainSql
 			return Task.FromResult<Object>(null);
 		}
 
-		private bool _disposed = false; // To detect redundant calls
+		private bool _disposed ;
 
 		protected virtual void Dispose(bool disposing)
 		{
 			if (!_disposed) {
 				if (disposing) {
-					// Dispose managed state (managed objects).
+					// Dispose managed resources
 				}
 
-				// Free unmanaged resources (unmanaged objects) and override a finalizer below.
+				// Free unmanaged resources
 				// Set large fields to null.
+
 				_disposed = true;
 			}
 		}

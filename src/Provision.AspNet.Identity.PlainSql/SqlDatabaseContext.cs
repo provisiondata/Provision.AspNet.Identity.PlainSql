@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading;
 
-namespace AspNet.Identity.PlainSql
+namespace Provision.AspNet.Identity.PlainSql
 {
 	/// <summary>
 	/// Class that encapsulates SQL database connections and CRUD operations.
 	/// </summary>
-	internal class PostgresWrapper
+	internal class SqlDatabase
 	{
 		private readonly IDbConnection _connection;
 
@@ -16,7 +16,7 @@ namespace AspNet.Identity.PlainSql
 		/// Constructor which takes the database connection.
 		/// </summary>
 		/// <param name="connection">The database connection.</param>
-		public PostgresWrapper(IDbConnection connection)
+		public SqlDatabase(IDbConnection connection)
 		{
 			_connection = connection;
 		}
@@ -110,18 +110,35 @@ namespace AspNet.Identity.PlainSql
 		}
 
 		/// <summary>
-		/// Creates a NpgsqlCommand Object with the given parameters.
+		/// Helper method to return query a String value.
 		/// </summary>
 		/// <param name="commandText">The SQL query to execute.</param>
 		/// <param name="parameters">Parameters to pass to the SQL query.</param>
-		/// <returns></returns>
-		private IDbCommand CreateCommand(String commandText, Dictionary<String, Object> parameters)
+		/// <returns>The String value resulting from the query.</returns>
+		public String GetString(String commandText, Dictionary<String, Object> parameters)
 		{
-			var command = _connection.CreateCommand();
-			command.CommandText = commandText;
-			AddParameters(command, parameters);
+			return QueryValue(commandText, parameters) as String;
+		}
 
-			return command;
+		/// <summary>
+		/// Helper method to return query a String value.
+		/// </summary>
+		/// <param name="commandText">The SQL query to execute.</param>
+		/// <param name="parameters">Parameters to pass to the SQL query.</param>
+		/// <returns>The String value resulting from the query.</returns>
+		public Guid GetGuid(String commandText, Dictionary<String, Object> parameters)
+		{
+			return (Guid)QueryValue(commandText, parameters);
+		}
+
+		/// <summary>
+		/// Closes the connection if it is open.
+		/// </summary>
+		public void CloseConnection()
+		{
+			if (_connection.State == ConnectionState.Open) {
+				_connection.Close();
+			}
 		}
 
 		/// <summary>
@@ -144,15 +161,18 @@ namespace AspNet.Identity.PlainSql
 		}
 
 		/// <summary>
-		/// Helper method to return query a String value.
+		/// Creates a NpgsqlCommand Object with the given parameters.
 		/// </summary>
 		/// <param name="commandText">The SQL query to execute.</param>
 		/// <param name="parameters">Parameters to pass to the SQL query.</param>
-		/// <returns>The String value resulting from the query.</returns>
-		public String GetStrValue(String commandText, Dictionary<String, Object> parameters)
+		/// <returns></returns>
+		private IDbCommand CreateCommand(String commandText, Dictionary<String, Object> parameters)
 		{
-			String value = QueryValue(commandText, parameters) as String;
-			return value;
+			var command = _connection.CreateCommand();
+			command.CommandText = commandText;
+			AddParameters(command, parameters);
+
+			return command;
 		}
 
 		/// <summary>
@@ -169,16 +189,6 @@ namespace AspNet.Identity.PlainSql
 				_connection.Open();
 				retries--;
 				Thread.Sleep(50);
-			}
-		}
-
-		/// <summary>
-		/// Closes the connection if it is open.
-		/// </summary>
-		public void CloseConnection()
-		{
-			if (_connection.State == ConnectionState.Open) {
-				_connection.Close();
 			}
 		}
 	}
