@@ -1,1 +1,1 @@
-# DKW.AspNet.Identity.PostgreSQL
+# Provision.AspNet.Identity.PlainSql

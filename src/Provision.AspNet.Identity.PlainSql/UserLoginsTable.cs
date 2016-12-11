@@ -1,0 +1,106 @@
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.AspNet.Identity;
+
+namespace AspNet.Identity.PlainSql
+{
+	/// <summary>
+	/// Class that represents the AspNetUserLogins table in the SQL Database.
+	/// </summary>
+	internal class UserLoginsTable
+	{
+		private readonly PostgresWrapper _database;
+
+		/// <summary>
+		/// Constructor that takes a open database connection instance.
+		/// </summary>
+		/// <param name="database"></param>
+		public UserLoginsTable(PostgresWrapper database)
+		{
+			_database = database;
+		}
+
+		/// <summary>
+		/// Deletes a login record from a user in the UserLogins table.
+		/// </summary>
+		/// <param name="user">User to have login deleted.</param>
+		/// <param name="login">Login to be deleted from user.</param>
+		/// <returns></returns>
+		public int Delete(IdentityUser user, UserLoginInfo login)
+		{
+			String commandText = "DELETE FROM \"AspNetUserLogins\" WHERE \"UserId\" = @userId AND \"LoginProvider\" = @loginProvider AND \"ProviderKey\" = @providerKey";
+			Dictionary<String, Object> parameters = new Dictionary<String, Object>();
+			parameters.Add("UserId", user.Id);
+			parameters.Add("loginProvider", login.LoginProvider);
+			parameters.Add("providerKey", login.ProviderKey);
+
+			return _database.Execute(commandText, parameters);
+		}
+
+		/// <summary>
+		/// Deletes all logins from a user in the UserLogins table.
+		/// </summary>
+		/// <param name="userId">The user's id.</param>
+		/// <returns></returns>
+		public int Delete(String userId)
+		{
+			String commandText = "DELETE FROM \"AspNetUserLogins\" WHERE \"UserId\" = @userId";
+			Dictionary<String, Object> parameters = new Dictionary<String, Object>();
+			parameters.Add("UserId", userId);
+
+			return _database.Execute(commandText, parameters);
+		}
+
+		/// <summary>
+		/// Inserts a new login record in the AspNetUserLogins table.
+		/// </summary>
+		/// <param name="user">User to have new login added.</param>
+		/// <param name="login">Login to be added.</param>
+		/// <returns></returns>
+		public int Insert(IdentityUser user, UserLoginInfo login)
+		{
+			String commandText = "INSERT INTO \"AspNetUserLogins\" (\"LoginProvider\", \"ProviderKey\", \"UserId\") VALUES (@loginProvider, @providerKey, @userId)";
+			Dictionary<String, Object> parameters = new Dictionary<String, Object>();
+			parameters.Add("loginProvider", login.LoginProvider);
+			parameters.Add("providerKey", login.ProviderKey);
+			parameters.Add("userId", user.Id);
+
+			return _database.Execute(commandText, parameters);
+		}
+
+		/// <summary>
+		/// Return a user ID given a user's login.
+		/// </summary>
+		/// <param name="userLogin">The user's login info.</param>
+		/// <returns></returns>
+		public String FindUserIdByLogin(UserLoginInfo userLogin)
+		{
+			String commandText = "SELECT \"UserId\" FROM \"AspNetUserLogins\" WHERE \"LoginProvider\" = @loginProvider AND \"ProviderKey\" = @providerKey";
+			Dictionary<String, Object> parameters = new Dictionary<String, Object>();
+			parameters.Add("loginProvider", userLogin.LoginProvider);
+			parameters.Add("providerKey", userLogin.ProviderKey);
+
+			return _database.GetStrValue(commandText, parameters);
+		}
+
+		/// <summary>
+		/// Returns a list of user's logins.
+		/// </summary>
+		/// <param name="userId">The user's id.</param>
+		/// <returns></returns>
+		public List<UserLoginInfo> FindByUserId(String userId)
+		{
+			List<UserLoginInfo> logins = new List<UserLoginInfo>();
+			String commandText = "SELECT * FROM \"AspNetUserLogins\" WHERE \"UserId\" = @userId";
+			Dictionary<String, Object> parameters = new Dictionary<String, Object>() { { "@userId", userId } };
+
+			var rows = _database.Query(commandText, parameters);
+			foreach (var row in rows) {
+				var login = new UserLoginInfo(row["LoginProvider"], row["ProviderKey"]);
+				logins.Add(login);
+			}
+
+			return logins;
+		}
+	}
+}
