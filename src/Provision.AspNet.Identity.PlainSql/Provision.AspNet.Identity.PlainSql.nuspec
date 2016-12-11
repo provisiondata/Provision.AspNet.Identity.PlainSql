@@ -8,7 +8,7 @@
     <owners>$author$</owners>
     <licenseUrl>https://github.com/dougkwilson/Provision.AspNet.Identity.SQL/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/dougkwilson/Provision.AspNet.Identity.SQL</projectUrl>
-    <iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>
+    <iconUrl>https://raw.githubusercontent.com/provisiondata/Provision.AspNet.Identity.PlainSql/master/src/Provision.AspNet.Identity.PlainSql/favicon.ico</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <releaseNotes>Initial commit</releaseNotes>
