@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProduct("Provision.AspNet.Identity.PlainSql")]
 [assembly: AssemblyCopyright("Copyright © 2016 Provision Data Systems Inc.")]
 [assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("EN-us")]
 [assembly: ComVisible(false)]
 [assembly: Guid("9248deff-4947-481f-ba7c-09e9925e62d2")]
 [assembly: AssemblyVersion("1.1.0.0")]
